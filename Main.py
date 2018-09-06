@@ -1,4 +1,11 @@
 from binance.client import Client
+import ConfigParser
+
+config = ConfigParser.ConfigParser()
+config.read(r'D:\git\config\binance\binance.cfg')
+api_key = config.get('binance', 'api_key')
+api_secret = config.get('binance', 'api_key')
+
 client = Client(api_key, api_secret)
 
 # get market depth
