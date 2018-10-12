@@ -42,8 +42,9 @@ def is3Positive(lines):
 
 for key in keys:
     try:
-        ret = is3Positive(binance.klines(key,'1w'))
-        if not ret is None and ret==True:
+        kline = binance.klines(key,'1w')
+        ret = is3Positive(kline)
+        if not ret is None and ret==True and not isPositive(kline[-5]):
             print key
     except Exception:
         print("Error",key,"1 week line")
