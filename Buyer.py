@@ -8,12 +8,6 @@
 import binance
 import datetime
 keys = binance.prices().keys()
-
-
-eos30m = binance.klines(u'EOSBTC','30m')
-eos60m = binance.klines(u'EOSBTC','1h')
-eos24h = binance.klines(u'EOSBTC','1d')
-
 '''
 kline = 
 {'close': u'0.00001842',
@@ -28,7 +22,28 @@ kline =
 
 '''
 
-def isPositive(kline):
-    open = float(kline['open'])
-    close = float(kline['close'])
-    if kline['open']
+def isPositive(line):
+    open = float(line['open'])
+    close = float(line['close'])
+    if close>open:
+        return True
+    elif close<open:
+        return False
+    else:
+        return None
+
+def is3Positive(lines):
+    if isPositive(lines[-2]) and isPositive(lines[-3]) and isPositive(lines[-4]):
+        return True
+    elif not (isPositive(lines[-2]) or isPositive(lines[-3]) or isPositive(lines[-4])):
+        return False
+    else:
+        return None
+
+for key in keys:
+    try:
+        ret = is3Positive(binance.klines(key,'1w'))
+        if not ret is None and ret==True:
+            print key
+    except Exception:
+        print("Error",key,"1 week line")
