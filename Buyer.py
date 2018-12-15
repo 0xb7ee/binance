@@ -18,7 +18,7 @@ import numpy as np
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 keys = binance.prices().keys()
-itchat.auto_login(hotReload=True, enableCmdQR=-1)
+itchat.auto_login(hotReload=True, enableCmdQR=2)
 friends = itchat.get_friends
 NICKNAME_USERNAME = {}
 for friend in friends:
