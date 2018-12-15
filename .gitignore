@@ -3,3 +3,5 @@ log/logs
 log/*.log
 *.py[cod]
 *.log:
+*.pkl
+*.png
