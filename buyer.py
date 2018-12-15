@@ -4,6 +4,8 @@
 作者:jia.zhou@aliyun.com
 创建时间:2018-10-11 下午5:24
 '''
+import schedule
+
 '''
 
 '''
@@ -36,15 +38,18 @@ kline =
  'volume': u'3471331.00000000'}
 
 '''
+
+
 def isPositive(line):
     open = float(line['open'])
     close = float(line['close'])
-    if close>open:
+    if close > open:
         return True
-    elif close<open:
+    elif close < open:
         return False
     else:
         return None
+
 
 def is3Positive(lines):
     if isPositive(lines[-2]) and isPositive(lines[-3]) and isPositive(lines[-4]):
@@ -91,7 +96,7 @@ def job1():
         b = getNow()
         a = a.decode("utf8")
         b = b.decode("utf8")
-        MSG = u"最近一周周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s"%b
+        MSG = u"最近一周周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s" % b
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + u" 发送到了Forrest")
     else:
@@ -132,9 +137,11 @@ def job2():
             rate = compute_30min_volume_rate(real_kline)
             if rate > 1:
                 ThirtyMinutesBigVolumn.append(key)
-                logging.info(u"[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
+                logging.info(
+                    u"[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
             else:
-                logging.info(u"[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
+                logging.info(
+                    u"[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
         except Exception:
             logging.error(u"Total week klines is less than 3 " + key + u" in 1 week line")
             logging.error(exc_info=True)
@@ -148,10 +155,10 @@ def job2():
 
 if __name__ == "__main__":
     # itchat.send("hello",NICKNAME_USERNAME['Forrest'])
-    job1()
-    job2()
-    # schedule.every().monday.at("08:01").do(job1)
-    # schedule.every(30).minute.do(job2)
+    # job1()
+    # job2()
+    schedule.every().monday.at("08:01").do(job1)
+    schedule.every(30).minute.do(job2)
     # while True:
     #     schedule.run_pending()
     #     time.sleep(1)
