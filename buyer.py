@@ -91,7 +91,7 @@ def job1():
         b = getNow()
         a = a.decode("utf8")
         b = b.decode("utf8")
-        MSG = u"最近周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s"%b
+        MSG = u"最近一周周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s"%b
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + u" 发送到了Forrest")
     else:
@@ -118,7 +118,7 @@ def compute_30min_volume_rate(real_kline):
 
 
 def job2():
-    logging.info("30分钟线暴拉的BTC交易对")
+    logging.info(u"30分钟线暴拉的BTC交易对")
     ThirtyMinutesBigVolumn = []
     for key in keys:
         if key[-3:] != 'BTC':
@@ -132,16 +132,18 @@ def job2():
             rate = compute_30min_volume_rate(real_kline)
             if rate > 1:
                 ThirtyMinutesBigVolumn.append(key)
-                logging.info("[ BIG VOLUMNE ]" + key + " with volumn:" + str(volume) + " ,volume rate is :" + str(rate))
+                logging.info(u"[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
+            else:
+                logging.info(u"[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
         except Exception:
-            logging.error("Total week klines is less than 3 " + key + " in 1 week line")
+            logging.error(u"Total week klines is less than 3 " + key + u" in 1 week line")
             logging.error(exc_info=True)
     if len(ThirtyMinutesBigVolumn) > 0:
         MSG = u"30分钟成交巨量的BTC交易对如下：\n" + u"\n".join(ThirtyMinutesBigVolumn)
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + u" 发送到了Forrest")
     else:
-        logging.info("暂无周线三连阳的BTC交易对")
+        logging.info(u"暂无30分钟暴拉的BTC交易对")
 
 
 if __name__ == "__main__":
