@@ -89,8 +89,8 @@ def job1():
     if len(ThreePositiveWeekKlinKEY) > 0:
         a = "\n".join(ThreePositiveWeekKlinKEY)
         b = getNow()
-        logging.info("type a:"+type(a))
-        logging.info("type b:"+type(b))
+        logging.info(type(a))
+        logging.info(type(b))
         a = a.decode("utf8")
         b = b.decode("utf8")
         MSG = "最近周线三连阳的BTC交易对如下：\n" + a + "\n+@%s\n"%b
