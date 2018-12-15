@@ -89,13 +89,11 @@ def job1():
     if len(ThreePositiveWeekKlinKEY) > 0:
         a = "\n".join(ThreePositiveWeekKlinKEY)
         b = getNow()
-        logging.info(type(a))
-        logging.info(type(b))
         a = a.decode("utf8")
         b = b.decode("utf8")
-        MSG = u"最近周线三连阳的BTC交易对如下：\n" + a + u"\n+@%s\n"%b
+        MSG = u"最近周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s"%b
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
-        logging.info(MSG + " 发送到了Forrest")
+        logging.info(MSG + u" 发送到了Forrest")
     else:
         logging.info("暂无周线三连阳的BTC交易对")
 
@@ -139,9 +137,9 @@ def job2():
             logging.error("Total week klines is less than 3 " + key + " in 1 week line")
             logging.error(exc_info=True)
     if len(ThirtyMinutesBigVolumn) > 0:
-        MSG = "30分钟成交巨量的BTC交易对如下：\n" + "\n".join(ThirtyMinutesBigVolumn)
+        MSG = u"30分钟成交巨量的BTC交易对如下：\n" + u"\n".join(ThirtyMinutesBigVolumn)
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
-        logging.info(MSG + " 发送到了Forrest")
+        logging.info(MSG + u" 发送到了Forrest")
     else:
         logging.info("暂无周线三连阳的BTC交易对")
 
