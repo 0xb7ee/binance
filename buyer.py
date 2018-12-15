@@ -86,8 +86,8 @@ def job1():
                 ThreePositiveWeekKlinKEY.append(key)
         except Exception:
             logging.error("Total week klines is less than 3 " + key + " in 1 week line")
-    if len(ThreePositiveWeekKlinKEY > 0):
-        MSG = "最近周线三连阳的BTC交易对如下：\n" + "\n".join(ThreePositiveWeekKlinKEY + "\n+@%s|n" % getNow())
+    if len(ThreePositiveWeekKlinKEY) > 0:
+        MSG = "最近周线三连阳的BTC交易对如下：\n" + "\n".join(ThreePositiveWeekKlinKEY) + "\n+@%s|n" % getNow())
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + " 发送到了Forrest")
     else:
@@ -132,7 +132,7 @@ def job2():
         except Exception:
             logging.error("Total week klines is less than 3 " + key + " in 1 week line")
             logging.error(exc_info=True)
-    if len(ThirtyMinutesBigVolumn > 0):
+    if len(ThirtyMinutesBigVolumn) > 0:
         MSG = "30分钟成交巨量的BTC交易对如下：\n" + "\n".join(ThirtyMinutesBigVolumn)
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + " 发送到了Forrest")
