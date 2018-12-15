@@ -93,7 +93,7 @@ def job1():
         logging.info(type(b))
         a = a.decode("utf8")
         b = b.decode("utf8")
-        MSG = "最近周线三连阳的BTC交易对如下：\n" + a + "\n+@%s\n"%b
+        MSG = u"最近周线三连阳的BTC交易对如下：\n" + a + u"\n+@%s\n"%b
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + " 发送到了Forrest")
     else:
