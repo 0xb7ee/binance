@@ -159,6 +159,6 @@ if __name__ == "__main__":
     # job2()
     schedule.every().monday.at("08:01").do(job1)
     schedule.every(30).minutes.do(job2)
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
