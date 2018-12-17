@@ -79,7 +79,7 @@ def getNow():
 
 
 def job1():
-    logging.info("周线首次三连阳的BTC交易对")
+    logging.info(u"##############周线首次三连阳的BTC交易对##############")
     ThreePositiveWeekKlinKEY = []
     for key in keys:
         if key[-3:] != 'BTC':
@@ -96,7 +96,7 @@ def job1():
         b = getNow()
         a = a.decode("utf8")
         b = b.decode("utf8")
-        MSG = u"最近一周周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s" % b
+        MSG = u"##############最近一周周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s" % b+u"##############"
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
         logging.info(MSG + u" 发送到了Forrest")
     else:
@@ -123,7 +123,7 @@ def compute_30min_volume_rate(real_kline):
 
 
 def job2():
-    logging.info(u"30分钟线暴拉的BTC交易对")
+    logging.info(u"##############30分钟线暴拉的BTC交易对##############")
     ThirtyMinutesBigVolumn = []
     for key in keys:
         if key[-3:] != 'BTC':
@@ -139,19 +139,19 @@ def job2():
                 msg = key+u":"+kline[-1]['close']
                 ThirtyMinutesBigVolumn.append(msg)
                 logging.info(
-                    u"[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
+                    u"##############[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate)+u"##############")
             else:
                 logging.info(
-                    u"[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
+                    u"##############[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate)+u"##############")
         except Exception:
-            logging.error(u"Total week klines is less than 3 " + key + u" in 1 week line")
+            logging.error(u"##############Total week klines is less than 3 " + key + u" in 1 week line##############")
             logging.error(exc_info=True)
     if len(ThirtyMinutesBigVolumn) > 0:
         MSG = u"30分钟成交巨量的BTC交易对如下：\n" + u"\n".join(ThirtyMinutesBigVolumn)
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
-        logging.info(MSG + u" 发送到了Forrest")
+        logging.info(u"##############"+MSG + u" 发送到了Forrest##############")
     else:
-        logging.info(u"暂无30分钟暴拉的BTC交易对")
+        logging.info(u"##############暂无30分钟暴拉的BTC交易对##############")
 
 def buyer_thread_job2():
     threading.Thread(job2()).start()
@@ -165,6 +165,7 @@ if __name__ == "__main__":
     while not (now.minute==0 or now.minute==30):
         time.sleep(5)
         now = datetime.datetime.now()
+    logging.info(u"##############BEGIN TO DO JOB2##############")
     schedule.every(30).minutes.do(buyer_thread_job2)
     while True:
         schedule.run_pending()
