@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # job2()
     schedule.every().monday.at("08:01").do(job1)
     now = datetime.datetime.now()
-    while not (now==0 or now==30):
+    while not (now.minute==0 or now.minute==30):
         time.sleep(5)
         now = datetime.datetime.now()
     schedule.every(30).minutes.do(buyer_thread_job2)
