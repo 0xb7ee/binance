@@ -114,7 +114,7 @@ def getLast30MinLine(kline):
 
 def compute_30min_volume_rate(real_kline):
     # 获取最近三天的30分钟线中成交量最大的一次
-    volumnList = [float(i['volume']) for i in real_kline[143:-1]]
+    volumnList = [float(i['volume']) for i in real_kline[-145:-1]]
     max_volumn = max(volumnList)
     delta_3 = np.mean(volumnList) + 3 * np.std(volumnList, ddof=1)
     this_volumn = float(real_kline[-1]['volume'])
@@ -136,7 +136,8 @@ def job2():
             volume = real_kline[-1]['volume']
             rate = compute_30min_volume_rate(real_kline)
             if rate > 1:
-                ThirtyMinutesBigVolumn.append(key)
+                msg = key+u":"+kline[-1]['close']
+                ThirtyMinutesBigVolumn.append(msg)
                 logging.info(
                     u"[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate))
             else:
