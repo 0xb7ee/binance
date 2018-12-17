@@ -20,7 +20,7 @@ import threading
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 keys = binance.prices().keys()
-itchat.auto_login(hotReload=True, enableCmdQR=2,statusStorageDir="/root/itchat.pkl")
+itchat.auto_login(hotReload=True, enableCmdQR=1,statusStorageDir="/root/itchat.pkl")
 friends = itchat.get_friends()
 NICKNAME_USERNAME = {}
 for friend in friends:
