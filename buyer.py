@@ -16,7 +16,7 @@ import time
 import binance
 import itchat
 import numpy as np
-
+import threading
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 keys = binance.prices().keys()
@@ -152,13 +152,19 @@ def job2():
     else:
         logging.info(u"暂无30分钟暴拉的BTC交易对")
 
+def buyer_thread_job2():
+    threading.Thread(job2()).start()
 
 if __name__ == "__main__":
     # itchat.send("hello",NICKNAME_USERNAME['Forrest'])
     # job1()
     # job2()
     schedule.every().monday.at("08:01").do(job1)
-    schedule.every(30).minutes.do(job2)
+    now = datetime.datetime.now()
+    while not (now==0 or now==30):
+        time.sleep(5)
+        now = datetime.datetime.now()
+    schedule.every(30).minutes.do(buyer_thread_job2)
     while True:
         schedule.run_pending()
         time.sleep(1)
