@@ -123,6 +123,7 @@ def compute_30min_volume_rate(real_kline):
 
 
 def job2():
+    itchat.auto_login(hotReload=True, enableCmdQR=1,statusStorageDir="/root/itchat.pkl")
     logging.info(u"##############30分钟线暴拉的BTC交易对##############")
     ThirtyMinutesBigVolumn = []
     for key in keys:
