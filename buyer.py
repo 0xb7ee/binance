@@ -123,7 +123,6 @@ def compute_30min_volume_rate(real_kline):
 
 
 def job2():
-    itchat.auto_login(hotReload=True, enableCmdQR=1,statusStorageDir="/root/itchat.pkl")
     logging.info(u"##############30分钟线暴拉的BTC交易对##############")
     ThirtyMinutesBigVolumn = []
     for key in keys:
@@ -144,9 +143,9 @@ def job2():
             else:
                 logging.info(
                     u"##############[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate)+u"##############")
-        except Exception:
+        except Exception,e:
             logging.error(u"##############Total week klines is less than 3 " + key + u" in 1 week line##############")
-            logging.error(exc_info=True)
+            logging.error(e,exc_info=True)
     if len(ThirtyMinutesBigVolumn) > 0:
         MSG = u"30分钟成交巨量的BTC交易对如下：\n" + u"\n".join(ThirtyMinutesBigVolumn)
         itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
