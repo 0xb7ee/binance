@@ -6,6 +6,8 @@
 '''
 import schedule
 
+from message.wechatEnterprise import sendMessageForUser
+
 '''
 
 '''
@@ -14,17 +16,16 @@ import logging
 import time
 
 import binance
-import itchat
 import numpy as np
 import threading
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 keys = binance.prices().keys()
-itchat.auto_login(hotReload=True, enableCmdQR=1,statusStorageDir="/root/itchat.pkl")
-friends = itchat.get_friends()
-NICKNAME_USERNAME = {}
-for friend in friends:
-    NICKNAME_USERNAME[friend['NickName']] = friend['UserName']
+# itchat.auto_login(hotReload=True, enableCmdQR=1,statusStorageDir="/root/itchat.pkl")
+# friends = itchat.get_friends()
+# NICKNAME_USERNAME = {}
+# for friend in friends:
+#     NICKNAME_USERNAME[friend['NickName']] = friend['UserName']
 '''
 kline = 
 {'close': u'0.00001842',
@@ -94,10 +95,8 @@ def job1():
     if len(ThreePositiveWeekKlinKEY) > 0:
         a = "\n".join(ThreePositiveWeekKlinKEY)
         b = getNow()
-        a = a.decode("utf8")
-        b = b.decode("utf8")
         MSG = u"##############最近一周周线三连阳的BTC交易对如下：\n" + a + u"\n发布时间:@%s" % b+u"##############"
-        itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
+        sendMessageForUser(MSG)
         logging.info(MSG + u" 发送到了Forrest")
     else:
         logging.info("暂无周线三连阳的BTC交易对")
@@ -141,14 +140,15 @@ def job2():
                 logging.info(
                     u"##############[ BIG VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate)+u"##############")
             else:
-                logging.info(
-                    u"##############[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate)+u"##############")
-        except Exception,e:
+                # logging.info(
+                #     u"##############[ Normal VOLUMNE ]" + key + u" with volumn:" + str(volume) + u" ,volume rate is :" + str(rate)+u"##############")
+                pass
+        except Exception as e:
             logging.error(u"##############Total week klines is less than 3 " + key + u" in 1 week line##############")
             logging.error(e,exc_info=True)
     if len(ThirtyMinutesBigVolumn) > 0:
         MSG = u"30分钟成交巨量的BTC交易对如下：\n" + u"\n".join(ThirtyMinutesBigVolumn)
-        itchat.send(MSG, NICKNAME_USERNAME['Forrest'])
+        sendMessageForUser(MSG)
         logging.info(u"##############"+MSG + u" 发送到了Forrest##############")
     else:
         logging.info(u"##############暂无30分钟暴拉的BTC交易对##############")
