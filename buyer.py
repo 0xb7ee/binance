@@ -4,6 +4,11 @@
 作者:jia.zhou@aliyun.com
 创建时间:2018-10-11 下午5:24
 '''
+
+
+'''
+此脚本用于提示币安 BTC交易对周线首次三连阳 以及30分钟线交易量暴涨币种，以及发送信息到企业微信
+'''
 import schedule
 
 from message.wechatEnterprise import sendMessageForUser
@@ -21,25 +26,6 @@ import threading
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 keys = binance.prices().keys()
-# itchat.auto_login(hotReload=True, enableCmdQR=1,statusStorageDir="/root/itchat.pkl")
-# friends = itchat.get_friends()
-# NICKNAME_USERNAME = {}
-# for friend in friends:
-#     NICKNAME_USERNAME[friend['NickName']] = friend['UserName']
-'''
-kline = 
-{'close': u'0.00001842',
- 'closeTime': 1539250199999,
- 'high': u'0.00001960',
- 'low': u'0.00001831',
- 'numTrades': 1762,
- 'open': u'0.00001869',
- 'openTime': 1539248400000,
- 'quoteVolume': u'66.55352920',
- 'volume': u'3471331.00000000'}
-
-'''
-
 
 def isPositive(line):
     open = float(line['open'])
