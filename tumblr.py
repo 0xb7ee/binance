@@ -44,14 +44,14 @@ class Consumer(Thread):
         session = requests.Session()
         while 1:
             link = self.queue.get()
-            print 'start parse post: ' + link
+            print('start parse post: ' + link)
             try:
                 content = session.get(link).content
                 videos = extractvideore.findall(content)
                 video_links.extend([vhead % v for v in videos])
                 pic_links.extend(extractpicre.findall(content))
             except:
-                print 'url: %s parse failed\n' % link
+                print('url: %s parse failed\n' % link)
             if self.queue.empty():
                 break
 
