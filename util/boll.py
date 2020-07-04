@@ -5,7 +5,6 @@
 创建时间:2020-06-09 上午11:21
 '''
 import numpy as np
-import datetime
 
 def computBoll(close_array:np.ndarray)->tuple:
     mean = close_array.mean()

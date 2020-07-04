@@ -16,7 +16,6 @@ def sendMessageForUser(content):
     url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={}&corpsecret={}'
     getr = requests.get(url=url.format(corpid,secret))
     access_token = getr.json().get("access_token")
-
     data = {
         "touser" : "ZhouJia",
         # "toparty" : "PartyID1|PartyID2",   # 向这些部门发送
