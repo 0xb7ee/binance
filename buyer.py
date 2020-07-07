@@ -333,9 +333,7 @@ def job3():
                     }
                 </style>
                 <meta charset="UTF-8">
-            
             </head>
-            
             <body>
             <table>
                 <thead>
@@ -350,17 +348,13 @@ def job3():
                 <th style="width: 100px">upper_1</th>
                 <th style="width: 100px">middle_1</th>
                 <th style="width: 100px">lowwer_1</th>
-                <!--<th style="width: 7.5%">upper_2</th>-->
-                <!--<th style="width: 7.5%">middle_2</th>-->
-                <!--<th style="width: 7.5%">lowwer_2</th>-->
                 </thead>
                 <tbody>
-            %s
+                %s
                 </tbody>
             </table>
             </body>
-            </html>
-            ''' % trs
+            </html>'''%trs
         fit = open("tmp.html", 'w+')
         fit.write(html)
         fit.close()
@@ -395,15 +389,20 @@ if __name__ == "__main__":
     # job1()
     # job2()
     # schedule.every().monday.at("08:01").do(job1)
-    job3()
-    now = datetime.datetime.now()
-    while not (now.hour == 12 and now.minute == 0):
-        time.sleep(5)
-        now = datetime.datetime.now()
+    # now = datetime.datetime.now()
+    # while not (now.hour == 12 and now.minute == 0):
+    #     time.sleep(5)
+    #     now = datetime.datetime.now()
     # logger.info(u"##############BEGIN TO DO JOB2##############")
     # schedule.every(30).minutes.do(buyer_thread_job2)
+    # job3()
     job3()
-    schedule.every(4).hours.at(":01").do(job3)
+    schedule.every().day.at("00:00").do(job3)
+    schedule.every().day.at("04:00").do(job3)
+    schedule.every().day.at("08:00").do(job3)
+    schedule.every().day.at("12:00").do(job3)
+    schedule.every().day.at("16:00").do(job3)
+    schedule.every().day.at("20:00").do(job3)
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+            schedule.run_pending()
+            time.sleep(1)
