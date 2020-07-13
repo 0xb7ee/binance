@@ -1,3 +1,9 @@
+#!/usr/bin/python
+# -*- coding:utf-8 -*- 
+'''
+作者:jia.zhou@aliyun.com
+创建时间:2020-07-13 下午4:58
+'''
 import datetime
 import functools
 import json
@@ -332,7 +338,7 @@ def job3():
         if key[-3:] != 'BTC':
             continue
         try:
-            kline = binance.klines(key, '4h')
+            kline = binance.klines(key, '1W')
             ret = isPositiveBoll(kline[:-1], key)
             if ret is not None and len(ret) > 0:
                 # logger.info(f"【{key}】{ret[0]}")
@@ -424,17 +430,6 @@ def buyer_thread_job2():
 
 
 if __name__ == "__main__":
-    # itchat.send("hello",NICKNAME_USERNAME['Forrest'])
-    # job1()
-    # job2()
-    # schedule.every().monday.at("08:01").do(job1)
-    # now = datetime.datetime.now()
-    # while not (now.hour == 12 and now.minute == 0):
-    #     time.sleep(5)
-    #     now = datetime.datetime.now()
-    # logger.info(u"##############BEGIN TO DO JOB2##############")
-    # schedule.every(30).minutes.do(buyer_thread_job2)
-    # job3()
     job3()
     schedule.every().day.at("00:00").do(job3)
     schedule.every().day.at("04:00").do(job3)
@@ -443,5 +438,5 @@ if __name__ == "__main__":
     schedule.every().day.at("16:00").do(job3)
     schedule.every().day.at("20:00").do(job3)
     while True:
-            schedule.run_pending()
-            time.sleep(1)
+        schedule.run_pending()
+        time.sleep(1)
