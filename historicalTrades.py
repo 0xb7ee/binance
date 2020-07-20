@@ -70,3 +70,5 @@ def vp_rank(data,end,key):
         index_v = index_value(data,i)
         ret.append([index_v[0],index_v[1]])
     return ret
+
+df.columns = ['key','time','vol_1w_std','prc_1w_std','vol_2w_std','prc_2w_std']

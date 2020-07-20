@@ -11,7 +11,9 @@ import numpy as np
 import schedule
 from requests_toolbelt import MultipartEncoder
 import pandas as pd
+from sqlalchemy import create_engine
 
+engine = create_engine('mysql://root:eos@localhost/crypto?charset=utf8')
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
@@ -184,6 +186,33 @@ def isPositiveBoll(lines, key):
             result = info
     return result
 
+def positive_boll(lines,key):
+    result = None
+    boll = []
+    rdn_close = [float(i['close']) for i in lines]
+    rate_dict = {}
+    boll_data = {}
+    for i in range(22, len(rdn_close)):
+        rdn_class = lines[i]
+        time = datetime.datetime.fromtimestamp(rdn_class['openTime'] / 1000)
+        k3 = np.array(rdn_close[i - 20:i + 1])
+        k2 = np.array(rdn_close[i - 21:i])
+        k1 = np.array(rdn_close[i - 22:i - 1])
+        k3_upper, k3_middle, k3_lowwer = computBoll(k3)
+        k2_upper, k2_middle, k2_lowwer = computBoll(k2)
+        k1_upper, k1_middle, k1_lowwer = computBoll(k1)
+        k3up = k3_upper / k2_upper
+        k2up = k2_upper / k1_upper
+        k3md = k3_middle / k2_middle
+        k2md = k2_middle / k1_middle
+        k3lw = k3_lowwer / k2_lowwer
+        k2lw = k2_lowwer / k1_lowwer
+        boll_data[time] = k3_upper, k3_middle, k3_lowwer, k2_upper, k2_middle, k2_lowwer, k1_upper, k1_middle, k1_lowwer
+        rate = k2up * k3up * k2md * k3md * (1 / k2lw) * (1 / k3lw)
+        if k2up > 1 and k3up > 1 and k2md > 1 and k3md > 1 and k2lw < 1 and k3lw < 1:
+            boll.append([key,time, rate, k3up, k2up, k3md, k2md, k3lw, k2lw])
+    return boll
+
 
 def get24hourVolume(ThreePositiveWeekKlin):
     for key in ThreePositiveWeekKlin:
@@ -201,6 +230,54 @@ def get24hourVolume(ThreePositiveWeekKlin):
 
 def getNow():
     return str(datetime.datetime.now() + datetime.timedelta(hours=8))
+
+
+def comput_vp(data,key):
+    # data['time'] = data['openTime'].apply(lambda x:datetime.datetime.fromtimestamp(x / 1000))
+    data['quoteVolume'] = data['quoteVolume'].astype('float')
+    data['volume'] = data['volume'].astype('float')
+    data['close'] = data['close'].astype('float')
+    # end = data['openTime'].values[-1]
+    lines = []
+    for i in data.iloc[84:]['openTime'].values:
+        trank = vp_rank(data,i)
+        if trank[0][0]>=1.5 and trank[0][1]>=1.5:
+            lines.append([key,datetime.datetime.fromtimestamp(i/1000),trank[0][0],trank[0][1],trank[1][0],trank[1][1]])
+    return lines
+
+
+def index_value(data,time_end,end):
+    end_data = data[data['openTime']==end]
+    t = data[(data['openTime']>=time_end)&(data['openTime']<end)]
+    # t = t.sort_values('volume',ascending=False)
+    # t = t.reset_index(drop=True)
+    # volume_index = t[t['openTime']==end].index.values[0]+1
+    volume_mean = t['volume'].mean()
+    volume_std = t['volume'].std()
+    v_index = (end_data['volume'].values[0]-volume_mean)/volume_std
+
+    # t = t.sort_values('close',ascending=False)
+    # t = t.reset_index(drop=True)
+    # close_index = t[t['openTime']==end].index.values[0]+1
+    close_mean = t['close'].mean()
+    close_std = t['close'].std()
+    c_index = (end_data['close'].values[0]-close_mean)/close_std
+    return (v_index,c_index)
+
+def vp_rank(data,end):
+    one_week_end = end-1000*60*60*24*7
+    two_week_end = end-1000*60*60*24*7*2
+    # three_week_end = end-1000*60*60*24*7*3
+    # four_week_end = end-1000*60*60*24*7*4
+    # two_month_end = end-1000*60*60*24*7*8
+    # three_month_end = end-1000*60*60*24*7*12
+    # time_end = [one_week_end,two_week_end,three_week_end,four_week_end,two_month_end,three_month_end]
+    time_end = [one_week_end,two_week_end]
+    ret = []
+    for i in time_end:
+        index_v = index_value(data,i,end)
+        ret.append([index_v[0],index_v[1]])
+    return ret
 
 
 def job1():
@@ -322,12 +399,17 @@ def job3():
     logger.info(f"EXEC_TIME:{str(datetime.datetime.now())}")
     posBollKlinKEY = []
     for key in keys:
-        if key[-3:] != 'BTC':
+        if key[-3:] != 'BTC' or key[-4:] != 'USDT' :
             continue
         try:
             kline = binance.klines(key, '4h')
-            ret = isPositiveBoll(kline[:-1], key)
-
+            vp = comput_vp(pd.DataFrame(kline[:-1]),key)
+            boll = positive_boll(kline[:-1],key)
+            vp_df = pd.DataFrame(vp,columns=['key','time','vol_1w_std','prc_1w_std','vol_2w_std','prc_2w_std'])
+            boll_df = pd.DataFrame(boll,columns=['key','time','rate','k3up','k2up','k3md', 'k2md', 'k3lw', 'k2lw'])
+            vp_df.to_sql('binance_vp',engine, index=False, if_exists='append')
+            boll_df.to_sql('binance_boll',engine, index=False, if_exists='append')
+            ret = pd.merge(vp_df,boll_df,how='inner',left_on='time',right_on='time')
             if ret is not None and len(ret) > 0:
                 # logger.info(f"【{key}】{ret[0]}")
                 posBollKlinKEY.append(ret)
