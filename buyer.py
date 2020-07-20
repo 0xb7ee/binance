@@ -136,13 +136,6 @@ def computd_diff(boll):
         times.append(boll[i][0])
     return days,times
 
-real_days = []
-real_times = []
-for i in range(len(days)):
-    if days[i]>0.167:
-        real_days.append(days[i])
-        real_times.append(times[i])
-
 
 
 def isPositiveBoll(lines, key):
@@ -334,6 +327,7 @@ def job3():
         try:
             kline = binance.klines(key, '4h')
             ret = isPositiveBoll(kline[:-1], key)
+
             if ret is not None and len(ret) > 0:
                 # logger.info(f"【{key}】{ret[0]}")
                 posBollKlinKEY.append(ret)
