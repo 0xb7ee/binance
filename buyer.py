@@ -4,7 +4,7 @@ import json
 import logging
 import threading
 import time
-
+import schedule
 import binance
 import imgkit
 import numpy as np
@@ -398,8 +398,8 @@ def comput_realtime_vp(data, key):
     :param key:
     :return:
     '''
-    end = data.iloc[-1]['openTime'].values[0]
-    close = data.iloc[-1]['close'].values[0]
+    end = data.iloc[-1]['openTime']
+    close = data.iloc[-1]['close']
     trank = vp_rank(data, end)
     lines = []
     if trank[0][0] >= 1.5 and trank[0][1] >= 1.5:
@@ -441,7 +441,6 @@ def job3():
     :return:
     '''
     logger.info(f"EXEC_TIME:{str(datetime.datetime.now())}")
-    posBollKlinKEY = []
     for key in keys:
         if key[-3:] == 'BTC':
             try:
@@ -451,8 +450,10 @@ def job3():
                 data['quoteVolume'] = data['quoteVolume'].astype('float')
                 data['volume'] = data['volume'].astype('float')
                 data['close'] = data['close'].astype('float')
-                vp = comput_vp(data, key)
-                boll = positive_boll(kline[:-1], key)
+                # vp = comput_vp(data, key)
+                # boll = positive_boll(kline[:-1], key)
+                vp = comput_realtime_vp(data,key)
+                boll = comput_realtime_boll(kline[:-1],key)
                 vp_df = pd.DataFrame(vp, columns=['key', 'time', 'close', 'vol_1w_std', 'prc_1w_std', 'vol_2w_std',
                                                   'prc_2w_std'])
                 boll_df = pd.DataFrame(boll,
@@ -565,13 +566,13 @@ if __name__ == "__main__":
     # logger.info(u"##############BEGIN TO DO JOB2##############")
     # schedule.every(30).minutes.do(buyer_thread_job2)
     # job3()
-    job3()
-    # schedule.every().day.at("00:00").do(job3)
-    # schedule.every().day.at("04:00").do(job3)
-    # schedule.every().day.at("08:00").do(job3)
-    # schedule.every().day.at("12:00").do(job3)
-    # schedule.every().day.at("16:00").do(job3)
-    # schedule.every().day.at("20:00").do(job3)
-    # while True:
-    #         schedule.run_pending()
-    #         time.sleep(1)
+    # job3()
+    schedule.every().day.at("00:00").do(job3)
+    schedule.every().day.at("04:00").do(job3)
+    schedule.every().day.at("08:00").do(job3)
+    schedule.every().day.at("12:00").do(job3)
+    schedule.every().day.at("16:00").do(job3)
+    schedule.every().day.at("20:00").do(job3)
+    while True:
+            schedule.run_pending()
+            time.sleep(1)

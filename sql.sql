@@ -42,3 +42,5 @@ CREATE TABLE IF NOT EXISTS `binance_boll`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='币安交易对的boll线表'
   AUTO_INCREMENT = 0;
+
+select a.`key` from (select * from binance_vp where `time`='2020-07-21 12:00:00') a inner join (select * from binance_vp where `time`='2020-07-21 12:00:00') b on a.`key` = b.`key` and a.`time` = b.`time`;
