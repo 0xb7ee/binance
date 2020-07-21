@@ -4,13 +4,13 @@ import json
 import logging
 import threading
 import time
-import requests
+
 import binance
 import imgkit
 import numpy as np
-import schedule
-from requests_toolbelt import MultipartEncoder
 import pandas as pd
+import requests
+from requests_toolbelt import MultipartEncoder
 from sqlalchemy import create_engine
 
 engine = create_engine('mysql://root:eos@localhost/crypto?charset=utf8')
@@ -55,7 +55,7 @@ def sendImgMessageForUser(imageid):
     url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={}&corpsecret={}'
     getr = requests.get(url=url.format(corpid, secret))
     access_token = getr.json().get("access_token")
-    data ={
+    data = {
         "touser": "ZhouJia",
         "totag": "TagID1 | TagID2",
         "msgtype": "image",
@@ -93,7 +93,6 @@ def uploadTmpFile(path):
     return response['media_id']
 
 
-
 def isPositive(line):
     open = float(line['open'])
     close = float(line['close'])
@@ -113,13 +112,15 @@ def is3Positive(lines):
     else:
         return None
 
-def is3std(lines,key):
+
+def is3std(lines, key):
     df = pd.DataFrame(lines[:-1])
     hight = df.high.astype(float)
     std = hight.std()
     mean = hight.mean()
-    if float(df.iloc[-1,:].close)>mean+3*std:
+    if float(df.iloc[-1, :].close) > mean + 3 * std:
         sendMessageForUser(key)
+
 
 def computd_diff(boll):
     '''
@@ -130,14 +131,13 @@ def computd_diff(boll):
     boll_1 = boll[1:]
     boll = boll[:-1]
     days = []
-    times=[]
+    times = []
     for i in range(len(boll)):
-        timedelta = boll_1[i][0]-boll[i][0]
-        day = timedelta.days+timedelta.seconds/(14400*6)
+        timedelta = boll_1[i][0] - boll[i][0]
+        day = timedelta.days + timedelta.seconds / (14400 * 6)
         days.append(day)
         times.append(boll[i][0])
-    return days,times
-
+    return days, times
 
 
 def isPositiveBoll(lines, key):
@@ -186,14 +186,14 @@ def isPositiveBoll(lines, key):
             result = info
     return result
 
-def positive_boll(lines,key):
-    result = None
+
+def positive_boll(lines, key):
     boll = []
     rdn_close = [float(i['close']) for i in lines]
-    rate_dict = {}
     boll_data = {}
     for i in range(22, len(rdn_close)):
         rdn_class = lines[i]
+        close = rdn_close[i]
         time = datetime.datetime.fromtimestamp(rdn_class['openTime'] / 1000)
         k3 = np.array(rdn_close[i - 20:i + 1])
         k2 = np.array(rdn_close[i - 21:i])
@@ -210,7 +210,7 @@ def positive_boll(lines,key):
         boll_data[time] = k3_upper, k3_middle, k3_lowwer, k2_upper, k2_middle, k2_lowwer, k1_upper, k1_middle, k1_lowwer
         rate = k2up * k3up * k2md * k3md * (1 / k2lw) * (1 / k3lw)
         if k2up > 1 and k3up > 1 and k2md > 1 and k3md > 1 and k2lw < 1 and k3lw < 1:
-            boll.append([key,time, rate, k3up, k2up, k3md, k2md, k3lw, k2lw])
+            boll.append([key, time, close, rate, k3up, k2up, k3md, k2md, k3lw, k2lw])
     return boll
 
 
@@ -232,51 +232,49 @@ def getNow():
     return str(datetime.datetime.now() + datetime.timedelta(hours=8))
 
 
-def comput_vp(data,key):
-    # data['time'] = data['openTime'].apply(lambda x:datetime.datetime.fromtimestamp(x / 1000))
-    data['quoteVolume'] = data['quoteVolume'].astype('float')
-    data['volume'] = data['volume'].astype('float')
-    data['close'] = data['close'].astype('float')
-    # end = data['openTime'].values[-1]
+def comput_vp(data, key):
     lines = []
     for i in data.iloc[84:]['openTime'].values:
-        trank = vp_rank(data,i)
-        if trank[0][0]>=1.5 and trank[0][1]>=1.5:
-            lines.append([key,datetime.datetime.fromtimestamp(i/1000),trank[0][0],trank[0][1],trank[1][0],trank[1][1]])
+        close = data[data['openTime'] == i]['close'].values[0]
+        trank = vp_rank(data, i)
+        if trank[0][0] >= 1.5 and trank[0][1] >= 1.5:
+            lines.append([key, datetime.datetime.fromtimestamp(i / 1000), close, trank[0][0], trank[0][1], trank[1][0],
+                          trank[1][1]])
     return lines
 
 
-def index_value(data,time_end,end):
-    end_data = data[data['openTime']==end]
-    t = data[(data['openTime']>=time_end)&(data['openTime']<end)]
+def index_value(data, time_end, end):
+    end_data = data[data['openTime'] == end]
+    t = data[(data['openTime'] >= time_end) & (data['openTime'] < end)]
     # t = t.sort_values('volume',ascending=False)
     # t = t.reset_index(drop=True)
     # volume_index = t[t['openTime']==end].index.values[0]+1
     volume_mean = t['volume'].mean()
     volume_std = t['volume'].std()
-    v_index = (end_data['volume'].values[0]-volume_mean)/volume_std
+    v_index = (end_data['volume'].values[0] - volume_mean) / volume_std
 
     # t = t.sort_values('close',ascending=False)
     # t = t.reset_index(drop=True)
     # close_index = t[t['openTime']==end].index.values[0]+1
     close_mean = t['close'].mean()
     close_std = t['close'].std()
-    c_index = (end_data['close'].values[0]-close_mean)/close_std
-    return (v_index,c_index)
+    c_index = (end_data['close'].values[0] - close_mean) / close_std
+    return (v_index, c_index)
 
-def vp_rank(data,end):
-    one_week_end = end-1000*60*60*24*7
-    two_week_end = end-1000*60*60*24*7*2
+
+def vp_rank(data, end):
+    one_week_end = end - 1000 * 60 * 60 * 24 * 7
+    two_week_end = end - 1000 * 60 * 60 * 24 * 7 * 2
     # three_week_end = end-1000*60*60*24*7*3
     # four_week_end = end-1000*60*60*24*7*4
     # two_month_end = end-1000*60*60*24*7*8
     # three_month_end = end-1000*60*60*24*7*12
     # time_end = [one_week_end,two_week_end,three_week_end,four_week_end,two_month_end,three_month_end]
-    time_end = [one_week_end,two_week_end]
+    time_end = [one_week_end, two_week_end]
     ret = []
     for i in time_end:
-        index_v = index_value(data,i,end)
-        ret.append([index_v[0],index_v[1]])
+        index_v = index_value(data, i, end)
+        ret.append([index_v[0], index_v[1]])
     return ret
 
 
@@ -390,7 +388,53 @@ def isbigline(kline):
     df = pd.DataFrame(kline)
     df['close'] = df['close'].astype(float)
     df['open'] = df['open'].astype(float)
-    df['rate'] = df['close']/df['open']-1
+    df['rate'] = df['close'] / df['open'] - 1
+
+
+def comput_realtime_vp(data, key):
+    '''
+    计算实时量价关系
+    :param data:
+    :param key:
+    :return:
+    '''
+    end = data.iloc[-1]['openTime'].values[0]
+    close = data.iloc[-1]['close'].values[0]
+    trank = vp_rank(data, end)
+    lines = []
+    if trank[0][0] >= 1.5 and trank[0][1] >= 1.5:
+        lines.append([key, datetime.datetime.fromtimestamp(end / 1000), close, trank[0][0], trank[0][1], trank[1][0],
+                      trank[1][1]])
+    return lines
+
+
+def comput_realtime_boll(lines, key):
+    boll = []
+    rdn_close = [float(i['close']) for i in lines]
+    close = rdn_close[-1]
+    boll_data = {}
+    i = len(rdn_close)
+    rdn_class = lines[i - 1]
+    time = datetime.datetime.fromtimestamp(rdn_class['openTime'] / 1000)
+    k3 = np.array(rdn_close[i - 20:i + 1])
+    k2 = np.array(rdn_close[i - 21:i])
+    k1 = np.array(rdn_close[i - 22:i - 1])
+    k3_upper, k3_middle, k3_lowwer = computBoll(k3)
+    k2_upper, k2_middle, k2_lowwer = computBoll(k2)
+    k1_upper, k1_middle, k1_lowwer = computBoll(k1)
+    k3up = k3_upper / k2_upper
+    k2up = k2_upper / k1_upper
+    k3md = k3_middle / k2_middle
+    k2md = k2_middle / k1_middle
+    k3lw = k3_lowwer / k2_lowwer
+    k2lw = k2_lowwer / k1_lowwer
+    boll_data[time] = k3_upper, k3_middle, k3_lowwer, k2_upper, k2_middle, k2_lowwer, k1_upper, k1_middle, k1_lowwer
+    rate = k2up * k3up * k2md * k3md * (1 / k2lw) * (1 / k3lw)
+    if k2up > 1 and k3up > 1 and k2md > 1 and k3md > 1 and k2lw < 1 and k3lw < 1:
+        boll.append([key, time, close, rate, k3up, k2up, k3md, k2md, k3lw, k2lw])
+    return boll
+
+
 def job3():
     '''
     计算boll线向上
@@ -399,77 +443,87 @@ def job3():
     logger.info(f"EXEC_TIME:{str(datetime.datetime.now())}")
     posBollKlinKEY = []
     for key in keys:
-        if key[-3:] != 'BTC' or key[-4:] != 'USDT' :
-            continue
-        try:
-            kline = binance.klines(key, '4h')
-            vp = comput_vp(pd.DataFrame(kline[:-1]),key)
-            boll = positive_boll(kline[:-1],key)
-            vp_df = pd.DataFrame(vp,columns=['key','time','vol_1w_std','prc_1w_std','vol_2w_std','prc_2w_std'])
-            boll_df = pd.DataFrame(boll,columns=['key','time','rate','k3up','k2up','k3md', 'k2md', 'k3lw', 'k2lw'])
-            vp_df.to_sql('binance_vp',engine, index=False, if_exists='append')
-            boll_df.to_sql('binance_boll',engine, index=False, if_exists='append')
-            ret = pd.merge(vp_df,boll_df,how='inner',left_on='time',right_on='time')
-            if ret is not None and len(ret) > 0:
-                # logger.info(f"【{key}】{ret[0]}")
-                posBollKlinKEY.append(ret)
-        except Exception as e:
-            logger.error(key)
-            logger.error(e, exc_info=True)
+        if key[-3:] == 'BTC':
+            try:
+                logger.info(f"计算 {key} 的历史量价")
+                kline = binance.klines(key, '4h')
+                data = pd.DataFrame(kline[:-1])
+                data['quoteVolume'] = data['quoteVolume'].astype('float')
+                data['volume'] = data['volume'].astype('float')
+                data['close'] = data['close'].astype('float')
+                vp = comput_vp(data, key)
+                boll = positive_boll(kline[:-1], key)
+                vp_df = pd.DataFrame(vp, columns=['key', 'time', 'close', 'vol_1w_std', 'prc_1w_std', 'vol_2w_std',
+                                                  'prc_2w_std'])
+                boll_df = pd.DataFrame(boll,
+                                       columns=['key', 'time', 'close', 'rate', 'k3up', 'k2up', 'k3md', 'k2md', 'k3lw',
+                                                'k2lw'])
+                vp_df.to_sql('binance_vp', engine, index=False, if_exists='append')
+                boll_df.to_sql('binance_boll', engine, index=False, if_exists='append')
+                # ret = pd.merge(vp_df,boll_df,how='inner',left_on='time',right_on='time')
+                # if ret is not None and len(ret) > 0:
+                #     # logger.info(f"【{key}】{ret[0]}")
+                #     posBollKlinKEY.append(ret)
+            except Exception as e:
+                logger.error(key)
+                logger.error(e, exc_info=True)
+
+
+def job3_send(posBollKlinKEY):
     key = functools.cmp_to_key(lambda a, b: cmp(a, b))
     posBollKlinKEY = sorted(posBollKlinKEY, key=key, reverse=True)
     if len(posBollKlinKEY) > 0:
         trs = convert2tds(posBollKlinKEY)
         html = '''
-            <html>
-            <head>
-                <style type="text/css">
-                    table {
-                        border-collapse: collapse;
-                        border:1px solid #f4f4f4;;
-                    }
-                    thead th {
-                        font-size: 20px;
-                        text-align: left;
-                        background: #20BAE6;
-                        color: #fff;
-                        font-weight: 100;
-                        line-height: 30px;
-                    }
-                    tbody tr {
-                        width: 400px;
-                        height: 20px;
-                    }
-                    tbody td {
-                        font-size: 9px;
-                        color: #59004a;
-                        line-height: 0px;
-                        /*border:1px solid #dddddd;*/
-                    }
-                </style>
-                <meta charset="UTF-8">
-            </head>
-            <body>
-            <table>
-                <thead>
-                <th style="width: 40px">pair</th>
-                <th style="width: 100px">close</th>
-                <th style="width: 70px">rate</th>
-                <th style="width: 140px">now</th>
-                <th style="width: 140px">past</th>
-                <th style="width: 100px">upper</th>
-                <th style="width: 100px">middle</th>
-                <th style="width: 100px">lowwer</th>
-                <th style="width: 100px">upper_1</th>
-                <th style="width: 100px">middle_1</th>
-                <th style="width: 100px">lowwer_1</th>
-                </thead>
-                <tbody>
-                %s
-                </tbody>
-            </table>
-            </body>
-            </html>'''%trs
+                <html>
+                <head>
+                    <style type="text/css">
+                        table {
+                            border-collapse: collapse;
+                            border:1px solid #f4f4f4;;
+                        }
+                        thead th {
+                            font-size: 20px;
+                            text-align: left;
+                            background: #20BAE6;
+                            color: #fff;
+                            font-weight: 100;
+                            line-height: 30px;
+                        }
+                        tbody tr {
+                            width: 400px;
+                            height: 20px;
+                        }
+                        tbody td {
+                            font-size: 9px;
+                            color: #59004a;
+                            line-height: 0px;
+                            /*border:1px solid #dddddd;*/
+                        }
+                    </style>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                <table>
+                    <thead>
+                    <th style="width: 40px">pair</th>
+                    <th style="width: 100px">close</th>
+                    <th style="width: 70px">rate</th>
+                    <th style="width: 140px">now</th>
+                    <th style="width: 140px">past</th>
+                    <th style="width: 100px">upper</th>
+                    <th style="width: 100px">middle</th>
+                    <th style="width: 100px">lowwer</th>
+                    <th style="width: 100px">upper_1</th>
+                    <th style="width: 100px">middle_1</th>
+                    <th style="width: 100px">lowwer_1</th>
+                    </thead>
+                    <tbody>
+                    %s
+                    </tbody>
+                </table>
+                </body>
+                </html>''' % trs
         fit = open("tmp.html", 'w+')
         fit.write(html)
         fit.close()
@@ -512,12 +566,12 @@ if __name__ == "__main__":
     # schedule.every(30).minutes.do(buyer_thread_job2)
     # job3()
     job3()
-    schedule.every().day.at("00:00").do(job3)
-    schedule.every().day.at("04:00").do(job3)
-    schedule.every().day.at("08:00").do(job3)
-    schedule.every().day.at("12:00").do(job3)
-    schedule.every().day.at("16:00").do(job3)
-    schedule.every().day.at("20:00").do(job3)
-    while True:
-            schedule.run_pending()
-            time.sleep(1)
+    # schedule.every().day.at("00:00").do(job3)
+    # schedule.every().day.at("04:00").do(job3)
+    # schedule.every().day.at("08:00").do(job3)
+    # schedule.every().day.at("12:00").do(job3)
+    # schedule.every().day.at("16:00").do(job3)
+    # schedule.every().day.at("20:00").do(job3)
+    # while True:
+    #         schedule.run_pending()
+    #         time.sleep(1)
