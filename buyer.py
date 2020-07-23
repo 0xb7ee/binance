@@ -403,7 +403,7 @@ def comput_realtime_vp(data, key):
     trank = vp_rank(data, end)
     lines = []
     if trank[0][0] >= 1.5 and trank[0][1] >= 1.5:
-        lines.append([key, datetime.datetime.fromtimestamp(end / 1000), close, trank[0][0], trank[0][1], trank[1][0],
+        lines.append([key, str(datetime.datetime.fromtimestamp(end / 1000)), close, trank[0][0], trank[0][1], trank[1][0],
                       trank[1][1]])
     return lines
 
@@ -412,10 +412,10 @@ def comput_realtime_boll(lines, key):
     boll = []
     rdn_close = [float(i['close']) for i in lines]
     close = rdn_close[-1]
-    boll_data = {}
+    # boll_data = {}
     i = len(rdn_close)
     rdn_class = lines[i - 1]
-    time = datetime.datetime.fromtimestamp(rdn_class['openTime'] / 1000)
+    time = str(datetime.datetime.fromtimestamp(rdn_class['openTime'] / 1000))
     k3 = np.array(rdn_close[i - 20:i + 1])
     k2 = np.array(rdn_close[i - 21:i])
     k1 = np.array(rdn_close[i - 22:i - 1])
@@ -428,7 +428,7 @@ def comput_realtime_boll(lines, key):
     k2md = k2_middle / k1_middle
     k3lw = k3_lowwer / k2_lowwer
     k2lw = k2_lowwer / k1_lowwer
-    boll_data[time] = k3_upper, k3_middle, k3_lowwer, k2_upper, k2_middle, k2_lowwer, k1_upper, k1_middle, k1_lowwer
+    # boll_data[time] = k3_upper, k3_middle, k3_lowwer, k2_upper, k2_middle, k2_lowwer, k1_upper, k1_middle, k1_lowwer
     rate = k2up * k3up * k2md * k3md * (1 / k2lw) * (1 / k3lw)
     if k2up > 1 and k3up > 1 and k2md > 1 and k3md > 1 and k2lw < 1 and k3lw < 1:
         boll.append([key, time, close, rate, k3up, k2up, k3md, k2md, k3lw, k2lw])
@@ -567,12 +567,12 @@ if __name__ == "__main__":
     # schedule.every(30).minutes.do(buyer_thread_job2)
     # job3()
     # job3()
-    schedule.every().day.at("00:00").do(job3)
-    schedule.every().day.at("04:00").do(job3)
-    schedule.every().day.at("08:00").do(job3)
-    schedule.every().day.at("12:00").do(job3)
-    schedule.every().day.at("16:00").do(job3)
-    schedule.every().day.at("20:00").do(job3)
+    schedule.every().day.at("00:01").do(job3)
+    schedule.every().day.at("04:01").do(job3)
+    schedule.every().day.at("08:01").do(job3)
+    schedule.every().day.at("12:01").do(job3)
+    schedule.every().day.at("16:01").do(job3)
+    schedule.every().day.at("20:01").do(job3)
     while True:
             schedule.run_pending()
             time.sleep(1)
